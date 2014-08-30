@@ -76,8 +76,10 @@ $(function () {
 				this.beginTime = now;
 			var x = this.x;
 			var y = this.y;
-			var width = 300;
-			var height = 300;
+			
+			var radius = this.radius;
+			var width = 2*radius;
+			var height = 2*radius;
 			// var grd=ctx.createRadialGradient(50,50,100,50,50,100);
 			// grd.addColorStop(0,"#FFFFFF");
 			// grd.addColorStop(1,"#FFFFFF");
@@ -91,7 +93,7 @@ $(function () {
 			}
 			else
 			{
-				var grd=ctx.createRadialGradient(x,y,30*completedInverse,x,y - 30,120);
+				var grd=ctx.createRadialGradient(x,y,0.2*radius*completedInverse,x,y - 0.2*radius,radius);
 				grd.addColorStop(0.0,"rgba(255,255,255," + completedInverse*2 + ")");
 				grd.addColorStop(0.6,"rgba(0,0,255," + completedInverse + ")");
 				grd.addColorStop(1,"transparent");
@@ -202,15 +204,8 @@ $(function () {
 
 				_.forEach(this.gameModel.projectiles, function (projectile) 
 				{
-					var x = projectile.box.x;
-					var y = projectile.box.y;
-
-					var grd=ctx.createRadialGradient(x,y,15,x,y,30);
-					grd.addColorStop(0.0,"white");
-					grd.addColorStop(0.6,"red");
-					grd.addColorStop(1,"transparent");
-					ctx.fillStyle = grd;
-					ctx.fillRect(projectile.box.x,projectile.box.y, projectile.box.width*2, projectile.box.height*2)
+					ctx.fillStyle = "red";
+					ctx.fillRect(projectile.box.x,projectile.box.y, projectile.box.width, projectile.box.height)
 				});
 				ctx.globalCompositeOperation="source-over";
 
@@ -246,9 +241,12 @@ $(function () {
 				var px = player.box.width/2 + player.box.x;
 				var py = player.box.y - pheight - 1;
 				var box = Box.create(px,py,5,pheight);
-				var projectile = {box :  Box.create(px,py,5,pheight), speed : 10 };
+				var p = {box :  Box.create(px,py,5,pheight), speed : 10 };
 				
-				gameModel.projectiles.push( projectile );
+				gameModel.projectiles.push( p );
+				var explosion = ExplosionAnimation.create(p.box.x + p.box.width/2, p.box.y + p.box.height/2, 20);
+				explosion.duration = 200;
+				gameModel.animations.push(explosion);
 				gameModel.player.weapon.lastFire = nowMilliseconds;
 				gameModel.score -= 1;
 			}
@@ -261,9 +259,9 @@ $(function () {
 			});
 
 			//update projectile positions
-			_.map(this.gameModel.projectiles, function(projectile) {
-				projectile.box.y -= projectile.speed;
-				
+			_.map(this.gameModel.projectiles, function(p) {
+				p.box.y -= p.speed;
+
 			});
 
 			//remove projectiles out of bounds
@@ -288,9 +286,10 @@ $(function () {
 				}
 			}
 
-			//Add Animations
+			//Add explosions for dead enemies
 			_.forEach(enemiesHit,function(e){
-				gameModel.animations.push(ExplosionAnimation.create(e.box.x + e.box.width/2, e.box.y + e.box.height/2, 50));
+				gameModel.animations.push(
+					ExplosionAnimation.create(e.box.x + e.box.width/2, e.box.y + e.box.height/2, 150));
 			});
 
 			//Remove hit enemies and projectiles
