@@ -19,11 +19,13 @@ $(function () {
 			keyRight : 39,
 			spaceBar : 32
 		}
-
+	//init canvas
 	console.log("Initializing ");
 	var canvas = document.getElementById("invaderCanvas");
 	var ctx = canvas.getContext("2d");
 	ctx.globalCompositeOperation="source-over";
+
+	//Box type
 	var Box = {
 		x : 0,
 		y : 0,
@@ -55,6 +57,7 @@ $(function () {
 		}
 	};
 
+	//Explosion animation type
 	var ExplosionAnimation = {
 		x : 0,
 		y : 0,
@@ -112,61 +115,7 @@ $(function () {
 		}
 	}
 
-	var initGameModel = (function () 
-	{
-		var plr = 
-			{ 
 
-			  box : Box.create(canvas.width/2, canvas.height - 30, 20, 30),
-			  maxvelocity : 300, // pixels per second
-
-			  weapon : {
-		  		type : "basic",
-			  	timeBetweenShots : 500, // milliseconds
-			  	lastFire : 0
-
-			  }
-			};
-		
-		var enemiesPerRow = 14;
-		var enemyCount = 3*enemiesPerRow;
-		// var enemyCount = 1;
-		//Array of enemies
-		var es =
-			_.chain(_.range(enemyCount))
-			.map(function (n){
-				var x = 70 + 50*(n % enemiesPerRow);
-				var y = 50 + 60*(Math.floor(n/enemiesPerRow));
-
-				var e = 
-					{
-						box : Box.create(x,y,20,30),
-						x : x,
-						y : y,
-						startX : x,
-						startY : y
-					};
-				return e;
-			})
-			.value();
-
-
-		var game = 	{
-				player : plr,
-				enemies : es,
-				projectiles : [],
-				animations : [],
-
-				gameWon : false,
-				gameLost : false,
-				score : 0
-			};
-
-		return game; 
-
-	});
-
-	
 	var game = {
 
 		gameModel : null,
@@ -190,26 +139,35 @@ $(function () {
 					ctx.fillText("You lost!",canvas.width/2 ,canvas.height/2)
 				}
 				
-				
+				//Call animations draw
 				ctx.globalCompositeOperation="lighter";
 				_.forEach(this.gameModel.animations, function(anim){
 					
 					anim.draw(ctx,nowMilliseconds);
 					
 				});
-				_.forEach([this.gameModel.player].concat(this.gameModel.enemies), function (thing) {
-					ctx.fillStyle = "#FFFFFF";
-					ctx.fillRect(thing.box.x,thing.box.y,thing.box.width,thing.box.height);
+
+				//Draw enemies
+				_.forEach([].concat(this.gameModel.enemies), function (enemy) {
+					var g = Math.floor((enemy.hitPoints/enemy.maxHitPoints) * 255);
+					var r =  255 - g;
+					ctx.fillStyle = 'rgb('+ r +','+ g + ',0)';
+					ctx.fillRect(enemy.box.x,enemy.box.y,enemy.box.width,enemy.box.height);
 				});
 
+				//Draw player
+				var player = this.gameModel.player;
+				ctx.fillStyle = "#FFFFFF";
+				ctx.fillRect(player.box.x,player.box.y,player.box.width,player.box.height);
+
+				//Draw projectiles
 				_.forEach(this.gameModel.projectiles, function (projectile) 
 				{
 					ctx.fillStyle = "red";
 					ctx.fillRect(projectile.box.x,projectile.box.y, projectile.box.width, projectile.box.height)
 				});
-				ctx.globalCompositeOperation="source-over";
 
-				
+				ctx.globalCompositeOperation="source-over";
 
 				ctx.font = "16px comic sans"
 				ctx.textAlign = "left"
@@ -241,7 +199,7 @@ $(function () {
 				var px = player.box.width/2 + player.box.x;
 				var py = player.box.y - pheight - 1;
 				var box = Box.create(px,py,5,pheight);
-				var p = {box :  Box.create(px,py,5,pheight), speed : 10 };
+				var p = {box :  Box.create(px,py,5,pheight), speed : player.weapon.projectileSpeed, damage : player.weapon.damage };
 				
 				gameModel.projectiles.push( p );
 				var explosion = ExplosionAnimation.create(p.box.x + p.box.width/2, p.box.y + p.box.height/2, 20);
@@ -280,6 +238,7 @@ $(function () {
 					var p = this.gameModel.projectiles[j];
 					if (e.box.intersects(p.box))
 					{
+						//remove hitpoints
 						enemiesHit.push(e);
 						projectilesExploded.push(p);
 					}
@@ -292,7 +251,14 @@ $(function () {
 					ExplosionAnimation.create(e.box.x + e.box.width/2, e.box.y + e.box.height/2, 150));
 			});
 
-			//Remove hit enemies and projectiles
+			//add explosion for projectile
+			_.forEach(projectilesExploded,function(p){
+				var ex = ExplosionAnimation.create(p.box.x + p.box.width/2, p.box.y + p.box.height/2, 20);
+				ex.duration = 500;
+				gameModel.animations.push(ex);
+			});
+
+			//Remove dead enemies and projectiles
 			this.gameModel.enemies = _.filter(this.gameModel.enemies, 
 				function (e) {
 					return !_.contains(enemiesHit,e); 
@@ -330,23 +296,88 @@ $(function () {
 				this.doUpdateGame(now,elapsedTimeMilliSeconds);
 			}
 			
-		}
-	};
+		},
 
-	
-	var startGame = function () 
+		initGameModel : function (level) 
 		{
-			game.gameModel = initGameModel();
+			var plr = 
+				{ 
+
+				  box : Box.create(canvas.width/2, canvas.height - 30, 20, 30),
+				  maxvelocity : 300, // pixels per second
+				  hitPoints : 5,
+				  weapon : {
+			  		type : "basic",
+				  	timeBetweenShots : 500, // milliseconds
+				  	lastFire : 0,
+				  	damage : 1,
+				  	projectileSpeed : 10
+
+				  }
+				};
+			
+			var enemiesPerRow = 14;
+			var enemyCount = 3*enemiesPerRow;
+			// var enemyCount = 1;
+			//Array of enemies
+			var es =
+				_.chain(_.range(enemyCount))
+				.map(function (n){
+					var x = 70 + 50*(n % enemiesPerRow);
+					var y = 50 + 60*(Math.floor(n/enemiesPerRow));
+					var hitPoints = Math.round(Math.random()*level)
+
+					var e = 
+						{
+							box : Box.create(x,y,20,30),
+							startX : x,
+							startY : y,
+							hitPoints : hitPoints,
+							maxHitPoints : hitPoints
+						};
+					return e;
+				})
+				.value();
+
+
+			var game = 	{
+					player : plr,
+					enemies : es,
+					projectiles : [],
+					animations : [],
+
+					gameWon : false,
+					gameLost : false,
+					score : 0
+				};
+
+			return game; 
+
+		},
+		timer : null,
+		startGame : function () 
+		{
+			if (this.timer != null) {
+				clearInterval(this.timer);
+				this.timer = null;
+			}
+			var game = this;
+			game.gameModel = this.initGameModel(5);
 			var drawTime = Date.now();
 			var gameStartTime = Date.now();
-			setInterval(function () {
+			this.timer = setInterval(function () {
 				var now = Date.now();
 				var elapsedSinceStart = now - gameStartTime;
 				game.updateGame(elapsedSinceStart ,now - drawTime);
 				game.drawScene(elapsedSinceStart);
 				drawTime = Date.now();
 			},1);
-		};
-	
-	startGame();
+
+		}
+	};
+
+	$("#newGameButton").click(function () {
+		game.startGame();
+	});
+	game.startGame();
 });

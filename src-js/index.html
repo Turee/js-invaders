@@ -1,16 +1,63 @@
 
 <!DOCTYPE HTML>
-<html ng-app="store">
+<html>
 	<head>
 		<!-- <script type="text/javascript" src="js/lib/app.js"></script> -->
 		<!-- <script type="text/javascript" src="js/lib/angular.js"></script> -->
-		<!-- <script type="text/javascript" src="js/lib/bootstrap.min.js"></script> -->
+		<title>Awesum space invaderz</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
 		<script type="text/javascript" src="js/lib/jquery-1.11.1.min.js"></script>
 		<script type="text/javascript" src="js/lib/lodash.min.js"></script>
 		<script type="text/javascript" src="js/invaders.js"></script>
+
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+
 	</head>
 	<body>
-		<canvas id="invaderCanvas" width=800 height=600> </canvas>
+		<script type="text/javascript" src="js/lib/bootstrap.min.js"></script> 
+		<div class="container">
+			<div class="row">
+
+				<h1 class="text-center">Super awesum space invaderz!</h1>
+
+			</div>
+			<div class="row">
+				<div class="col-md-2">
+					<h3>Players</h3>
+					<table height=300 class="table">
+						<th>Name</th>
+						<th>Score</th>
+					</table>
+					<h3>Weapons</h3>
+					<table class="table">
+						<th>Key</th>
+						<th>Type</th>
+						<th>Ammo</th>
+					</table>
+				</div>
+				<div class="col-md-8">
+					<canvas id="invaderCanvas" width=800 height=600> </canvas>	
+				</div>
+				<div class="col-md-2"></div>
+	        </div>
+
+			<div class="row">
+				<div class="col-md-2">
+
+				</div>
+				<div class="col-md-2">
+					<button id="newGameButton" class="btn btn-lg btn-primary">New game</button>
+				</div>
+				<div class="col-md-5">
+
+				</div>
+				<div class="col-md-2">
+					<button class="btn btn-lg btn-primary" disabled="disabled" >Next level</button>
+				</div>
+	        </div>
+        </div>
 	</body>
 </html>
