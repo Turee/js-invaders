@@ -472,7 +472,7 @@ $(function () {
 			
 		},
 
-		initGameModel : function (level) 
+		initGameModel : function (level,score) 
 		{
 			var plr = 
 				{ 
@@ -518,7 +518,7 @@ $(function () {
 					maxEnemyHitpoints : maxHitPts,
 					gameWon : false,
 					gameLost : false,
-					score : 0
+					score : score
 				};
 
 			return gameModel; 
@@ -551,9 +551,9 @@ $(function () {
 			}
 			var game = this;
 			var level = (game.gameModel != null && nextLevel) ? (game.gameModel.level + 1) : 1;
-			game.gameModel = this.initGameModel(level);
-
 			var score = (game.gameModel != null && nextLevel) ? (game.gameModel.score) : 0;
+
+			game.gameModel = this.initGameModel(level,score);
 			game.gameModel.score = score;
 
 		}
