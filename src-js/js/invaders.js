@@ -98,7 +98,7 @@ $(function () {
 				var w = Weapon.createDefault();
 				w.type = "rail_gun";
 				w.displayName = "Rail gun";
-				w.damage = 5;
+				w.damage = 10;
 				w.timeBetweenShots = 2000;
 				w.projectileHeight = 20;
 				w.projectileWidth = 15;
@@ -166,7 +166,7 @@ $(function () {
 			
 			var radius = this.radius;
 			var width = 2*radius;
-			var height = 2*radius;
+			var height = 2.5*radius;
 			// var grd=ctx.createRadialGradient(50,50,100,50,50,100);
 			// grd.addColorStop(0,"#FFFFFF");
 			// grd.addColorStop(1,"#FFFFFF");
@@ -290,7 +290,7 @@ $(function () {
 			}
 			var weaponsStr =
 				_.map(player.weapons,function (w){
-				  	return " <tr> <td>" + w.displayName + "</td>  <td>" + w.ammo + "</td> </tr>";
+				  	return " <tr style=\"red\"> <td>" + w.displayName + "</td>  <td>" + w.ammo + "</td> </tr>";
 				  });
 
 			$("#weapon-table").html( 
