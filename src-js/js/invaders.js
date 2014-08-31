@@ -202,8 +202,10 @@ $(function () {
 
 	var game = {
 
+		//Current game model
 		gameModel : null,
 
+		//Draws the scene based on game model
 		drawScene : function (nowMilliseconds) {
 				ctx.fillStyle = "#000000";
 				ctx.fillRect(0,0,canvas.width, canvas.height);
@@ -272,6 +274,7 @@ $(function () {
 
 			},
 
+		//Updates the game model
 		doUpdateGame : function (nowMilliseconds,elapsedTimeMilliSeconds) {
 			//Player position 
 			var elapsedTimeSeconds = elapsedTimeMilliSeconds / 1000.0;
@@ -464,6 +467,7 @@ $(function () {
 
 		},
 
+		//Calls doUpdateGame if conditions are right
 		updateGame : function(now,elapsedTimeMilliSeconds) {
 			if (!this.gameModel.gameWon && !this.gameModel.gameLost)
 			{
@@ -472,6 +476,7 @@ $(function () {
 			
 		},
 
+		//Initializes new instance of game model
 		initGameModel : function (level,score) 
 		{
 			var plr = 
@@ -524,9 +529,8 @@ $(function () {
 			return gameModel; 
 
 		},
-		timer : null,
-		//Nextlevel = true if proceed to next level
 
+		//Main game loop
 		gameLoop : function ()
 		{
 			var drawTime = Date.now();
@@ -543,6 +547,7 @@ $(function () {
 			requestAnimationFrame(frame);
 		},
 
+		//Nextlevel = true if proceed to next level
 		startGame : function (nextLevel) 
 		{
 			if (this.timer != null) {
@@ -559,6 +564,7 @@ $(function () {
 		}
 	};
 
+	//Event handlers for buttons
 	$("#newGameButton").click(function () {
 		game.startGame(false);
 	});
