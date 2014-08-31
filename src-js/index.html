@@ -16,7 +16,7 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 
 	</head>
-	<body>
+	<body >
 		<script type="text/javascript" src="js/lib/bootstrap.min.js"></script> 
 		<div class="container">
 			<div class="row">
@@ -26,16 +26,13 @@
 			</div>
 			<div class="row">
 				<div class="col-md-2">
-					<h3>Players</h3>
+<!-- 					<h3>Players</h3>
 					<table height=300 class="table">
 						<th>Name</th>
 						<th>Score</th>
-					</table>
+					</table> -->
 					<h3>Weapons</h3>
-					<table class="table">
-						<th>Key</th>
-						<th>Type</th>
-						<th>Ammo</th>
+					<table id="weapon-table" class="table">
 					</table>
 				</div>
 				<div class="col-md-8">
@@ -55,7 +52,7 @@
 
 				</div>
 				<div class="col-md-2">
-					<button class="btn btn-lg btn-primary" disabled="disabled" >Next level</button>
+					<button id="nextLevelButton" class="btn btn-lg btn-primary"  >Next level</button>
 				</div>
 	        </div>
         </div>

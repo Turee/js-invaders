@@ -1,10 +1,15 @@
 
+
 $(function () {
 
+
+
+	//Game stuff
 	var pressedKeys = {};
 
 	document.onkeydown = function (e)
 	{
+		console.log("pressed key: " + e.which);
 		pressedKeys[e.which] = true;
 	};
 
@@ -17,13 +22,92 @@ $(function () {
 		{
 			keyLeft : 37,
 			keyRight : 39,
-			spaceBar : 32
+			spaceBar : 32,
+			n1 : 49,
 		}
+
 	//init canvas
 	console.log("Initializing ");
 	var canvas = document.getElementById("invaderCanvas");
 	var ctx = canvas.getContext("2d");
 	ctx.globalCompositeOperation="source-over";
+
+	var Weapon = {
+	  		type : "lazor",
+	  		displayName :"Lazor",
+		  	timeBetweenShots : 500, // milliseconds
+		  	lastFire : 0,
+		  	damage : 1,
+		  	projectileSpeed : 10,
+		  	projectileHeight : 10,
+		  	projectileWidth : 5,
+		  	ammo : 100,
+
+		  	createDefault : function()
+		  	{
+		  		return Object.create(this);
+		  	},
+		  	create : function(type,timeBetweenShots,damage,projectileSpeed,pheight,pwidth)
+		  	{
+		  		var weapon = this.createDefault();
+		  		weapon.type = type;
+		  		weapon.timeBetweenShots = timeBetweenShots;
+		  		weapon.damage = damage;
+		  		weapon.projectileSpeed = projectileSpeed;
+		  		weapon.projectileHeight = pheight;
+		  		weapon.projectileWidth = pwidth;
+		  		return weapon;
+		  	},
+
+		  	createProjectile : function(x,y)
+		  	{ 
+		  		var box = Box.create(x,y,this.projectileWidth,this.projectileHeight);
+		  		return {
+		  			box : box,
+		  			damage : this.damage,
+		  			speed : this.projectileSpeed,
+		  			penetratedEnemies : [],
+		  		};
+		  	}
+		}
+
+	var PowerUpTypes =
+		[
+			"vulcan_ammo",
+			"lazor_ammo",
+			"rail_gun_ammo"
+		]
+
+	var AllWeapons =
+		_.map([
+			(function () {
+				return Weapon.createDefault();
+			}),
+			(function () {
+				var w = Weapon.createDefault();
+				w.type = "vulcan";
+				w.displayName = "Vulcan";
+				w.damage = 0.5;
+				w.timeBetweenShots = 50;
+				w.projectileHeight = 5;
+				w.projectileWidth = 2;
+				w.ammo = 500;
+				return w;
+			}),
+			(function () {
+				var w = Weapon.createDefault();
+				w.type = "rail_gun";
+				w.displayName = "Rail gun";
+				w.damage = 5;
+				w.timeBetweenShots = 2000;
+				w.projectileHeight = 20;
+				w.projectileWidth = 15;
+				w.projectileSpeed = 20;
+				w.ammo = 10;
+				return w;
+			})
+		], function (f) {return f();});
+
 
 	//Box type
 	var Box = {
@@ -123,7 +207,7 @@ $(function () {
 		drawScene : function (nowMilliseconds) {
 				ctx.fillStyle = "#000000";
 				ctx.fillRect(0,0,canvas.width, canvas.height);
-
+				var gameModel = this.gameModel;
 				if (this.gameModel.gameWon)
 				{
 					ctx.fillStyle = "#FFFFFF";
@@ -149,10 +233,22 @@ $(function () {
 
 				//Draw enemies
 				_.forEach([].concat(this.gameModel.enemies), function (enemy) {
-					var g = Math.floor((enemy.hitPoints/enemy.maxHitPoints) * 255);
+					var g = Math.floor((enemy.hitPoints/gameModel.maxEnemyHitpoints) * 255);
 					var r =  255 - g;
 					ctx.fillStyle = 'rgb('+ r +','+ g + ',0)';
 					ctx.fillRect(enemy.box.x,enemy.box.y,enemy.box.width,enemy.box.height);
+				});
+
+				//Draw powerups
+
+				_.forEach(this.gameModel.powerUps,function(pu){
+					if (pu.type == 'vulcan_ammo')
+						ctx.fillStyle = "yellow";
+					if (pu.type == 'rail_gun_ammo')
+						ctx.fillStyle = "cyan";
+					if (pu.type == 'lazor_ammo')
+						ctx.fillStyle = "pink";
+					ctx.fillRect(pu.box.x,pu.box.y,pu.box.width,pu.box.height)
 				});
 
 				//Draw player
@@ -172,7 +268,7 @@ $(function () {
 				ctx.font = "16px comic sans"
 				ctx.textAlign = "left"
 				ctx.fillStyle = "#FFFFFF";
-				ctx.fillText("Score: " + this.gameModel.score,5,5+16)
+				ctx.fillText("Level: " + this.gameModel.level + " | Score: " + this.gameModel.score,5,5+16)
 
 			},
 
@@ -183,6 +279,25 @@ $(function () {
 			var player = this.gameModel.player;
 			var gameModel = this.gameModel;
 
+			//Select weapon
+			//weaponsController.setWeapons(player.weapons);
+			for (var i = 0; i < player.weapons.length; i++)
+			{
+				if (pressedKeys[keys.n1 + i])
+				{
+					player.weapon = player.weapons[i];
+				}
+			}
+			var weaponsStr =
+				_.map(player.weapons,function (w){
+				  	return " <tr> <td>" + w.displayName + "</td>  <td>" + w.ammo + "</td> </tr>";
+				  });
+
+			$("#weapon-table").html( 
+				" <tr> <th>Type</th>  <th>Ammo</th> </tr>"
+				+ weaponsStr
+				);
+
 			if (pressedKeys[keys.keyLeft]) {
 				player.box.x -= playerVelocity*elapsedTimeSeconds;
 			}
@@ -191,22 +306,24 @@ $(function () {
 				player.box.x += playerVelocity*elapsedTimeSeconds;	
 			}
 
-			//Weapon
+			//Weapon projectile
 			if (pressedKeys[keys.spaceBar] 
-				&& player.weapon.timeBetweenShots < (nowMilliseconds - player.weapon.lastFire) )
+				&& player.weapon.ammo > 0
+				&& player.weapon.timeBetweenShots < (nowMilliseconds - player.weapon.lastFire))
 			{
-				var pheight = 10;
+
+
 				var px = player.box.width/2 + player.box.x;
-				var py = player.box.y - pheight - 1;
-				var box = Box.create(px,py,5,pheight);
-				var p = {box :  Box.create(px,py,5,pheight), speed : player.weapon.projectileSpeed, damage : player.weapon.damage };
-				
+				var py = player.box.y - player.weapon.projectileHeight - 1;
+				var p = player.weapon.createProjectile(px,py);
+
 				gameModel.projectiles.push( p );
-				var explosion = ExplosionAnimation.create(p.box.x + p.box.width/2, p.box.y + p.box.height/2, 20);
+				var explosion = ExplosionAnimation.create(p.box.x + p.box.width/2, p.box.y + p.box.height/2, 20*p.damage);
 				explosion.duration = 200;
 				gameModel.animations.push(explosion);
 				gameModel.player.weapon.lastFire = nowMilliseconds;
-				gameModel.score -= 1;
+				gameModel.player.weapon.ammo -= 1;
+				gameModel.score -= gameModel.player.weapon.damage;
 			}
 
 			//update enemy positions
@@ -220,6 +337,11 @@ $(function () {
 			_.map(this.gameModel.projectiles, function(p) {
 				p.box.y -= p.speed;
 
+			});
+
+			//Update powerup positions
+			_.map(this.gameModel.powerUps,function(pu){
+				pu.box.y += 50*elapsedTimeSeconds;
 			});
 
 			//remove projectiles out of bounds
@@ -238,8 +360,10 @@ $(function () {
 					var p = this.gameModel.projectiles[j];
 					if (e.box.intersects(p.box))
 					{
-						//remove hitpoints
-						enemiesHit.push(e);
+						e.hitPoints -= p.damage;
+						if(e.hitPoints <= 0)
+							enemiesHit.push(e);
+						p.penetratedEnemies.push(e);
 						projectilesExploded.push(p);
 					}
 				}
@@ -265,20 +389,70 @@ $(function () {
 				});
 			this.gameModel.projectiles = _.filter(this.gameModel.projectiles, 
 				function (e) {
-					return !_.contains(projectilesExploded,e); 
+					return  !_.contains(projectilesExploded,e); 
 				});
 
 			//update score
-			gameModel.score +=  enemiesHit.length*5;
-			gameModel.score += projectilesExploded.length;
+			gameModel.score +=  _.reduce(enemiesHit,function(sum,e){
+				return sum + e.maxHitPoints*5;
+			},0);
+			gameModel.score += _.reduce(projectilesExploded,function (sum,p) {
+					return p.damage + sum;
+				},0);
+
+			//Add powerups from dead enemies
+			_.forEach(enemiesHit,function (e){
+				var pu = {
+					type : _.sample(PowerUpTypes),
+					box : Box.create(e.box.x,e.box.y,10,10)
+				};
+				gameModel.powerUps.push(pu);
+			});
+
 
 			//check collision with player
 			var playerCollision = _.some(gameModel.enemies, function(e){
 					return e.box.intersects(player.box);
 				});
+
+			var powerUpCollisionsWithPlayer =
+				_.filter(gameModel.powerUps,function(pu) {
+					return pu.box.intersects(player.box)
+				});
+
+			//Add benefits from powerups
+
+			_.forEach(powerUpCollisionsWithPlayer,function (pu) 
+			{
+				var addAmmo = function(count, weapon) 
+				{
+					_.forEach(player.weapons,function (w) 
+					{
+						if (w.type == weapon)
+							w.ammo += count;
+					});
+				}
+				if (pu.type == "vulcan_ammo")
+					addAmmo(100,"vulcan");
+				if (pu.type == "lazor_ammo")
+					addAmmo(20,"lazor");
+				if (pu.type == "rail_gun_ammo")
+					addAmmo(5,"rail_gun");
+			});
+
+			this.gameModel.powerUps = _.filter(this.gameModel.powerUps, 
+				function (pu) {
+					return  !_.contains(powerUpCollisionsWithPlayer,pu); 
+				});
 			//if enemies are at bottom
 			var enemiesAtBottom = _.some(this.gameModel.enemies, function(e) {
 				return (e.box.y + e.box.height) > canvas.height;
+			});
+
+			//remove powerups out of bounds
+
+			_.remove(this.gameModel.powerUps, function(pu){
+				return pu.y > canvas.height;
 			});
 
 			//remove completed animations
@@ -306,14 +480,8 @@ $(function () {
 				  box : Box.create(canvas.width/2, canvas.height - 30, 20, 30),
 				  maxvelocity : 300, // pixels per second
 				  hitPoints : 5,
-				  weapon : {
-			  		type : "basic",
-				  	timeBetweenShots : 500, // milliseconds
-				  	lastFire : 0,
-				  	damage : 1,
-				  	projectileSpeed : 10
-
-				  }
+				  weapon : AllWeapons[0],
+				  weapons : AllWeapons,
 				};
 			
 			var enemiesPerRow = 14;
@@ -325,7 +493,7 @@ $(function () {
 				.map(function (n){
 					var x = 70 + 50*(n % enemiesPerRow);
 					var y = 50 + 60*(Math.floor(n/enemiesPerRow));
-					var hitPoints = Math.round(Math.random()*level)
+					var hitPoints = Math.ceil(Math.random()*level)
 
 					var e = 
 						{
@@ -338,46 +506,69 @@ $(function () {
 					return e;
 				})
 				.value();
-
-
-			var game = 	{
+			var maxHitPts = _.max(es,function(e){return e.maxHitPoints;}).maxHitPoints;
+			console.log(maxHitPts);
+			var gameModel = 	{
+					level : level,
 					player : plr,
 					enemies : es,
 					projectiles : [],
 					animations : [],
-
+					powerUps : [],
+					maxEnemyHitpoints : maxHitPts,
 					gameWon : false,
 					gameLost : false,
 					score : 0
 				};
 
-			return game; 
+			return gameModel; 
 
 		},
 		timer : null,
-		startGame : function () 
+		//Nextlevel = true if proceed to next level
+
+		gameLoop : function ()
+		{
+			var drawTime = Date.now();
+			var gameStartTime = Date.now();
+
+			var frame = function() {
+				var now = Date.now();
+				var elapsedSinceStart = now - gameStartTime;
+				game.updateGame(elapsedSinceStart ,now - drawTime);
+				game.drawScene(elapsedSinceStart);
+				drawTime = Date.now();
+				requestAnimationFrame(frame);
+			}
+			requestAnimationFrame(frame);
+		},
+
+		startGame : function (nextLevel) 
 		{
 			if (this.timer != null) {
 				clearInterval(this.timer);
 				this.timer = null;
 			}
 			var game = this;
-			game.gameModel = this.initGameModel(5);
-			var drawTime = Date.now();
-			var gameStartTime = Date.now();
-			this.timer = setInterval(function () {
-				var now = Date.now();
-				var elapsedSinceStart = now - gameStartTime;
-				game.updateGame(elapsedSinceStart ,now - drawTime);
-				game.drawScene(elapsedSinceStart);
-				drawTime = Date.now();
-			},1);
+			var level = (game.gameModel != null && nextLevel) ? (game.gameModel.level + 1) : 1;
+			game.gameModel = this.initGameModel(level);
+
+			var score = (game.gameModel != null && nextLevel) ? (game.gameModel.score) : 0;
+			game.gameModel.score = score;
 
 		}
 	};
 
 	$("#newGameButton").click(function () {
-		game.startGame();
+		game.startGame(false);
 	});
+
+	$("#nextLevelButton").click(function() {
+		game.startGame(true);
+	});
+
+
+	game.gameLoop();
 	game.startGame();
+
 });
