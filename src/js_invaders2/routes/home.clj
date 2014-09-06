@@ -9,6 +9,7 @@
             [compojure.handler :refer [api]]
             [noir.response :as response]))
 
+
 (defn home-page []
   (layout/render
     "index.html"))
@@ -17,7 +18,7 @@
 	(response/json (db/get-scores)))
 
 (defn add-score [name score]
-	(let [name (string/trim name)]
+	(let [name ((comp string/trim util/escape-html) name)]
 		(cond
 			(empty? name)
 			(response/json { :error "Please give a name"})
