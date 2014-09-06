@@ -1,6 +1,6 @@
 # js-invaders2
 
-FIXME
+Programmed this game to build my skills in JavaScript and Clojure. Game is available for play here: http://radiant-brook-1933.herokuapp.com/ .
 
 ## Prerequisites
 
