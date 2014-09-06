@@ -28,6 +28,20 @@ $(function () {
 		$.get("/apiv1/scores","",success);
 	};
 
+	var onGameLost = function () 
+	{
+		$("#submitStatusP").removeClass("hidden");
+		$("#submitScoreForm").removeClass("hidden");
+		$(".notNeededWhilePlaying").removeClass("hidden");
+	};
+
+	var onGameStart = function () 
+	{
+		$("#submitStatusP").addClass("hidden");
+		$("#submitScoreForm").addClass("hidden");
+		$(".notNeededWhilePlaying").addClass("hidden");
+	};
+
 	//Game stuff
 	var pressedKeys = {};
 
@@ -364,7 +378,7 @@ $(function () {
 			//update enemy positions
 			_.map(this.gameModel.enemies, function (enemy) {
 				enemy.box.x = Math.sin(nowMilliseconds/1000.0)*50 + enemy.startX;
-				enemy.box.y += 5*elapsedTimeSeconds;
+				enemy.box.y += (gameModel.level*0.2 + 5)*elapsedTimeSeconds;
 				return enemy;
 			});
 
@@ -495,8 +509,11 @@ $(function () {
 
 			//winning / losing conditions
 			this.gameModel.gameWon = this.gameModel.enemies.length == 0;
-			this.gameModel.gameLost = playerCollision || enemiesAtBottom;
 
+			var gameLost =  playerCollision || enemiesAtBottom;
+			if (gameLost && gameLost != this.gameLost) onGameLost();
+			this.gameModel.gameLost = gameLost;
+			
 		},
 
 		//Calls doUpdateGame if conditions are right
@@ -582,6 +599,9 @@ $(function () {
 		//Nextlevel = true if proceed to next level
 		startGame : function (nextLevel) 
 		{
+
+
+			onGameStart();
 			if (this.timer != null) {
 				clearInterval(this.timer);
 				this.timer = null;
@@ -613,9 +633,22 @@ $(function () {
 		var score = game.gameModel ? game.gameModel.score : 0;
 
 		var success = (function (data,status,xhr) {
-			console.log("post,success");
-			console.log(data);
-			updateHighScoreTable();
+			console.log(status);
+			if (data.error)
+			{
+				$("#submitStatusP").html(data.error);
+			}
+			else if(status == "success")
+			{
+				$("#submitStatusP").html("Score submitted!");
+				$("#submitScoreForm").addClass("hidden");
+				updateHighScoreTable();
+			}
+			else
+			{
+				$("#submitStatusP").html("unknown error!");	
+			}
+
 		});
 		$.post("/apiv1/scores",{name : name , score : score},success,"json");
 	});

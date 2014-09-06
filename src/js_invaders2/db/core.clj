@@ -16,7 +16,7 @@
     (let [min-score-top10 (:score
                               (first (select scores
                                  (order :score :DESC)
-                                 (offset 10)
+                                 (offset 9)
                                  (limit 1))))]
       (println min-score-top10)
       (if min-score-top10

@@ -25,48 +25,57 @@
 
 			</div>
 			<div class="row">
-				<div class="col-md-10">
-					<canvas id="invaderCanvas" width=800 height=600> </canvas>	
 
-					<button id="newGameButton" class="btn btn-lg btn-primary">New game</button>
-<!-- 					<button id="nextLevelButton"  class="btn btn-lg btn-primary"  >Next level</button> -->
-				</div>
-				
-				<div class="col-md-2">
+				<div class="col-lg-3">
 <!-- 					<h3>Players</h3>
 					<table height=300 class="table">
 						<th>Name</th>
 						<th>Score</th>
 					</table> -->
+					
 					<h3>Weapons</h3>
 					<table id="weapon-table" class="table table-condensed">
 					</table>
 		        	
+
 		        	<h3>How to play</h3>
 		        	<p>Move: Arrow keys</p>
 		        	<p>Fire: Space</p>
-		        	<p>Select weapons: 1,2,3 </p>
+		        	<p>Select weapons: number keys 1,2 and 3 </p>
 		        	<p>Note: enemies drop weapon ammo when they die</p>
-		        	
 
 
-	        		<h3>Scores</h3>
+	        		<h3>TOP 10</h3>
 
-		        	<table id="highScoreTable" class="table table-condensed">
+		        	<table id="highScoreTable" class="table table-condensed ">
 		        		
 		        	</table>
-		        	<p>Submitted!</p>
-		        	<div class="hidden">
-		        		<form role="form">
-		        			<div class="form-group">
-		        				<label for="playerNameInput">Name</label>
-		        				<input type="text" class="form-control" id="playerNameInput"></input>
-		        				
-		        			</div>
-		        			<button onClick="return false" id="submitScoreButton">Submit score</button>
-		        		</form>
-	        		</div>
+
 				</div>
+
+				<div class="col-lg-9">
+					
+					<canvas id="invaderCanvas" width=800 height=600> </canvas>	
+
+					<div class="notNeededWhilePlaying">
+						<button id="newGameButton" class="btn btn-lg btn-primary">New game</button>
+						<h4 id="submitStatusP" class="hidden">Submit high score</h4>
+			        	<div id="submitScoreForm" class="hidden">
+			        		<form role="form">
+			        			<div class="form-group">
+			        				<label for="playerNameInput">Name</label>
+			        				<input type="text" class="form-control" id="playerNameInput"></input>
+			        				
+			        			</div>
+			        			<button class="btn" onClick="return false" id="submitScoreButton">Submit score</button>
+			        		</form>
+		        		</div>
+	        		</div>
+
+<!-- 					<button id="nextLevelButton"  class="btn btn-lg btn-primary"  >Next level</button> -->
+				</div>
+				
+
 	        </div>
 
         </div>
