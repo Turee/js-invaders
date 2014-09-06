@@ -630,7 +630,7 @@ $(function () {
 	$("#submitScoreButton").click(function () {
 		var name = $("#playerNameInput").val();
 		var score = game.gameModel ? game.gameModel.score : 0;
-
+		$("#submitScoreButton").prop('disabled', true);
 		var success = (function (data,status,xhr) {
 			console.log(status);
 			console.log(data);
@@ -648,6 +648,7 @@ $(function () {
 			{
 				$("#submitStatusP").html("unknown error!");	
 			}
+			$("#submitScoreButton").prop('disabled', false);
 
 		});
 		$.post("/apiv1/scores",{name : name , score : score},success,"json");
