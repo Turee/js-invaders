@@ -21,10 +21,17 @@
 		<div class="container">
 			<div class="row">
 
-				<h1 class="text-center">Super awesum space invaderz!</h1>
+				<h1 class="text-center header">Super awesum space invaderz!</h1>
 
 			</div>
 			<div class="row">
+				<div class="col-md-10">
+					<canvas id="invaderCanvas" width=800 height=600> </canvas>	
+
+					<button id="newGameButton" class="btn btn-lg btn-primary">New game</button>
+<!-- 					<button id="nextLevelButton"  class="btn btn-lg btn-primary"  >Next level</button> -->
+				</div>
+				
 				<div class="col-md-2">
 <!-- 					<h3>Players</h3>
 					<table height=300 class="table">
@@ -34,34 +41,33 @@
 					<h3>Weapons</h3>
 					<table id="weapon-table" class="table table-condensed">
 					</table>
+		        	
 		        	<h3>How to play</h3>
 		        	<p>Move: Arrow keys</p>
 		        	<p>Fire: Space</p>
 		        	<p>Select weapons: 1,2,3 </p>
 		        	<p>Note: enemies drop weapon ammo when they die</p>
+		        	
 
+
+	        		<h3>Scores</h3>
+
+		        	<table id="highScoreTable" class="table table-condensed">
+		        		
+		        	</table>
+		        	<p>Submitted!</p>
+		        	<div class="hidden">
+		        		<form role="form">
+		        			<div class="form-group">
+		        				<label for="playerNameInput">Name</label>
+		        				<input type="text" class="form-control" id="playerNameInput"></input>
+		        				
+		        			</div>
+		        			<button onClick="return false" id="submitScoreButton">Submit score</button>
+		        		</form>
+	        		</div>
 				</div>
-				<div class="col-md-8">
-					<canvas id="invaderCanvas" width=800 height=600> </canvas>	
-				</div>
-				<div class="col-md-2"></div>
 	        </div>
-
-			<div class="row">
-				<div class="col-md-2">
-
-				</div>
-				<div class="col-md-2">
-					<button id="newGameButton" class="btn btn-lg btn-primary">New game</button>
-				</div>
-				<div class="col-md-5">
-
-				</div>
-				<div class="col-md-2">
-					<button id="nextLevelButton" class="btn btn-lg btn-primary"  >Next level</button>
-				</div>
-	        </div>
-
 
         </div>
 	</body>

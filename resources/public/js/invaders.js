@@ -3,6 +3,30 @@
 $(function () {
 
 
+	var onEnterPress = null;
+
+	var updateHighScoreTable = function() 
+	{
+
+		var success = function (data) 
+		{
+			var header = 
+				"<tr><th>Score</th> <th>Name</th></tr>";
+			
+			var content =
+				_.map(data,function(row) {
+					return "<tr>" + "<td>" + row.score + "</td>" + "<td>" + row.name + "</td>" + "</tr>";
+
+				}).join("\n");
+
+			console.log(content);
+			$("#highScoreTable").html(
+				header + content
+			);
+		};
+
+		$.get("/apiv1/scores","",success);
+	};
 
 	//Game stuff
 	var pressedKeys = {};
@@ -13,18 +37,26 @@ $(function () {
 		pressedKeys[e.which] = true;
 	};
 
-	document.onkeyup = function (e)
-	{
-		pressedKeys[e.which] = false;
-	};
-
 	var keys =
 		{
 			keyLeft : 37,
 			keyRight : 39,
 			spaceBar : 32,
 			n1 : 49,
+			enter : 13
+		};
+
+	document.onkeyup = function (e)
+	{
+		pressedKeys[e.which] = false;
+
+		if (onEnterPress && e.which == keys.enter )
+		{
+			onEnterPress();
 		}
+	};
+
+	
 
 	//init canvas
 	console.log("Initializing ");
@@ -215,14 +247,14 @@ $(function () {
 					ctx.fillStyle = "#FFFFFF";
 					ctx.font = "40px comic sans"
 					ctx.textAlign = "center"
-					ctx.fillText("You win!",canvas.width/2 ,canvas.height/2)
+					ctx.fillText("Level complete! Enter to continue",canvas.width/2 ,canvas.height/2)
 				}
 				if(this.gameModel.gameLost)
 				{
 					ctx.fillStyle = "#FFFFFF";
 					ctx.font = "40px comic sans"
 					ctx.textAlign = "center"
-					ctx.fillText("You lost!",canvas.width/2 ,canvas.height/2)
+					ctx.fillText("Click new game to try again",canvas.width/2 ,canvas.height/2)
 				}
 				
 				//Call animations draw
@@ -498,7 +530,7 @@ $(function () {
 				.map(function (n){
 					var x = 70 + 50*(n % enemiesPerRow);
 					var y = 50 + 60*(Math.floor(n/enemiesPerRow));
-					var hitPoints = Math.ceil(Math.random()*level)
+					var hitPoints = Math.ceil(Math.random()*level*2)
 
 					var e = 
 						{
@@ -569,12 +601,28 @@ $(function () {
 		game.startGame(false);
 	});
 
-	$("#nextLevelButton").click(function() {
-		game.startGame(true);
+	onEnterPress = (function() {
+		if (game.gameModel && game.gameModel.gameWon)
+		{
+			game.startGame(true);
+		}
+	});
+
+	$("#submitScoreButton").click(function () {
+		var name = $("#playerNameInput").val();
+		var score = game.gameModel ? game.gameModel.score : 0;
+
+		var success = (function (data,status,xhr) {
+			console.log("post,success");
+			console.log(data);
+			updateHighScoreTable();
+		});
+		$.post("/apiv1/scores",{name : name , score : score},success,"json");
 	});
 
 
 	game.gameLoop();
 	game.startGame();
 
+	updateHighScoreTable();
 });
