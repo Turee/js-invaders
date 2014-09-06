@@ -19,7 +19,6 @@ $(function () {
 
 				}).join("\n");
 
-			console.log(content);
 			$("#highScoreTable").html(
 				header + content
 			);
@@ -634,6 +633,7 @@ $(function () {
 
 		var success = (function (data,status,xhr) {
 			console.log(status);
+			console.log(data);
 			if (data.error)
 			{
 				$("#submitStatusP").html(data.error);

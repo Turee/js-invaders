@@ -18,7 +18,6 @@
                                  (order :score :DESC)
                                  (offset 9)
                                  (limit 1))))]
-      (println min-score-top10)
       (if min-score-top10
         (delete scores (where {:score [< min-score-top10]}) ))))
 

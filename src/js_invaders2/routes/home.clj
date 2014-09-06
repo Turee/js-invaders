@@ -17,17 +17,21 @@
 	(response/json (db/get-scores)))
 
 (defn add-score [name score]
-	(let [name (string/trim name)])
-	(cond
-		(empty? name)
-		(response/json { :error "Please give a name"})
-		
-		(empty? score)
-		(response/json { :error "There seems to be a bug in the application"})
-		
-		:else
-		(db/add-score name ((comp math/round read-string) score)))
-		(response/json {}))
+	(let [name (string/trim name)]
+		(cond
+			(empty? name)
+			(response/json { :error "Please give a name"})
+
+			(> (count name) 30)
+			(response/json { :error "Name length must be less than 30 characters"})		
+			
+			(empty? score)
+			(response/json { :error "There seems to be a bug in the application"})
+			
+			:else
+			(do 
+				(db/add-score name ((comp math/round read-string) score))
+				(response/json {})))))
 	
 
 (defroutes home-routes
