@@ -34,8 +34,14 @@
 (defn initialized?
   "checks to see if the database schema is present"
   []
-  (.exists (new java.io.File (str (io/resource-path) db-store ".mv.db"))))
-; (defn initialized? [] false)
+  (cond 
+    (env :dev)
+      (.exists (new java.io.File (str (io/resource-path) db-store ".mv.db")))
+    :else
+      false
+    ))
+  
+  
 
 (defn create-scores-table []
     "Creates table for scores"
