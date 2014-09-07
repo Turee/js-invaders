@@ -1,17 +1,34 @@
 (ns js-invaders2.db.schema
   (:require [clojure.java.jdbc :as sql]
-            [noir.io :as io]))
+            [noir.io :as io]
+            [korma.db :as korma]
+            [clojure.data.json :as json]
+            [environ.core :refer [env]]))
 
 (def db-store "site.db")
 
-(def db-spec {:classname "org.h2.Driver"
-              :subprotocol "h2"
-              :subname (str (io/resource-path) db-store)
-              :user "sa"
-              :password ""
-              :make-pool? true
-              :naming {:keys clojure.string/lower-case
-                       :fields clojure.string/upper-case}})
+(def db-spec (cond
+                (env :dev)
+                  {:classname "org.h2.Driver"
+                  :subprotocol "h2"
+                  :subname (str (io/resource-path) db-store)
+                  :user "sa"
+                  :password ""
+                  :make-pool? true
+                  :naming {:keys clojure.string/lower-case
+                           :fields clojure.string/upper-case}}
+                :else
+                  (let
+                    [conn-details (json/read-str (slurp (str (io/resource-path) "conn_details.db")))]
+                    {
+                      :host (:host conn-details)
+                      :port (:port conn-details)
+                      :db (:db conn-details)
+                      :user (:user conn-details)
+                      :password (:password conn-details)
+                    })))
+            
+      
 
 
 (defn initialized?

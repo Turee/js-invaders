@@ -19,9 +19,11 @@
      [im.chit/cronj "1.0.1"]
      [environ "0.5.0"]
      [korma "0.3.3"]
+     [org.clojure/data.json "0.2.5"]
      [org.clojure/clojure "1.6.0"]
      [ring-server "0.3.1"]
      [com.taoensso/tower "2.0.2"]
+     [postgresql/postgresql "9.1-901.jdbc4"]
      [org.clojure/math.numeric-tower "0.0.4"]]
 
   :repl-options {:init-ns js-invaders2.repl}
