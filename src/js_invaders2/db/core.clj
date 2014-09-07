@@ -12,7 +12,7 @@
       (values {
         :name name
         :score score
-        :timestamp (new java.util.Date)}))
+        :timestamp (new java.sql.Timestamp (.getTime (new java.util.Date)))}))
     (let [min-score-top10 (:score
                               (first (select scores
                                  (order :score :DESC)

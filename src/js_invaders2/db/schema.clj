@@ -2,7 +2,6 @@
   (:require [clojure.java.jdbc :as sql]
             [noir.io :as io]
             [korma.db :as korma]
-            [clojure.data.json :as json]
             [environ.core :refer [env]]))
 
 (def db-store "site.db")
@@ -16,18 +15,7 @@
       :password password}))
 
 
-(def db-spec (cond
-                (env :dev)
-                  {:classname "org.h2.Driver"
-                  :subprotocol "h2"
-                  :subname (str (io/resource-path) db-store)
-                  :user "sa"
-                  :password ""
-                  :make-pool? true
-                  :naming {:keys clojure.string/lower-case
-                           :fields clojure.string/upper-case}}
-                :else
-                  (korma/postgres (conn-details-from-url (env :database-url)))))
+(def db-spec (korma/postgres (conn-details-from-url (env :database-url))))
             
       
 
@@ -35,12 +23,7 @@
 (defn initialized?
   "checks to see if the database schema is present"
   []
-  (cond 
-    (env :dev)
-      (.exists (new java.io.File (str (io/resource-path) db-store ".mv.db")))
-    :else
-      false
-    ))
+  false)
   
   
 
@@ -50,7 +33,7 @@
       db-spec
       (sql/create-table-ddl
         :scores
-        [:id "INTEGER PRIMARY KEY AUTO_INCREMENT"]
+        [:id "SERIAL PRIMARY KEY"]
         [:timestamp :timestamp]
         [:name "varchar(30)"]
         [:score "integer"]))
@@ -60,5 +43,7 @@
 (defn create-tables
   "creates the database tables used by the application"
   []
-  (create-scores-table))
+  (try
+    (create-scores-table)
+    (catch Exception e (println (.getMessage e)))))
 

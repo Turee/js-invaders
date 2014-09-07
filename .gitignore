@@ -9,3 +9,6 @@ pom.xml
 /.env
 *.log
 *.db
+*.nrepl-port
+.nrepl-port
+set_psql.bat
