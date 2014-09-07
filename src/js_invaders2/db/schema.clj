@@ -27,7 +27,7 @@
                   :naming {:keys clojure.string/lower-case
                            :fields clojure.string/upper-case}}
                 :else
-                  (conn-details-from-url (env :database-url))))
+                  (korma/postgres (conn-details-from-url (env :database-url)))))
             
       
 
