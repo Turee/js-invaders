@@ -609,7 +609,7 @@ $(function () {
 			var level = (game.gameModel != null && nextLevel) ? (game.gameModel.level + 1) : 1;
 			var score = (game.gameModel != null && nextLevel) ? (game.gameModel.score) : 0;
 
-			game.gameModel = this.initGameModel(1000,score);
+			game.gameModel = this.initGameModel(level,score);
 			game.gameModel.score = score;
 
 		}
