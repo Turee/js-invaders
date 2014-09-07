@@ -15,7 +15,11 @@
       :password password}))
 
 
-(def db-spec (korma/postgres (conn-details-from-url (env :database-url))))
+(def db-spec 
+    (let [db-url (env :database-url)]
+      (if-not (empty? db-url)
+        (korma/postgres (conn-details-from-url ))
+        (korma/postgres {:host "localhost" :port 5432 :db "default" :user "sa" :password ""}))))
             
       
 
