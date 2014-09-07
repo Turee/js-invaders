@@ -6,6 +6,15 @@
             [environ.core :refer [env]]))
 
 (def db-store "site.db")
+(defn conn-details-from-url
+  [url]
+  (let [[[match user password host port database]] (re-seq #"postgres\:\/\/(.*)\:(.*)\@(.*)\:(.*)\/(.*)" url)] {
+      :host host
+      :port port
+      :db database
+      :user user
+      :password password}))
+
 
 (def db-spec (cond
                 (env :dev)
@@ -18,15 +27,7 @@
                   :naming {:keys clojure.string/lower-case
                            :fields clojure.string/upper-case}}
                 :else
-                  (let
-                    [conn-details (json/read-str (slurp (str (io/resource-path) "conn_details.db")))]
-                    {
-                      :host (:host conn-details)
-                      :port (:port conn-details)
-                      :db (:db conn-details)
-                      :user (:user conn-details)
-                      :password (:password conn-details)
-                    })))
+                  (conn-details-from-url (env :database-url))))
             
       
 
